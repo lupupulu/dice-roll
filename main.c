@@ -2,7 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#if defined(_WIN64) || defined(_WIN32)
+#include <windows.h>
+#include <ntsecapi.h>
+#else
 #include <sys/random.h>
+#endif
 #include <time.h>
 #include <unistd.h>
 
@@ -337,13 +342,25 @@ int64_t operator(unsigned int op,int64_t origin,int64_t arg){
     return 0;
 }
 
+#if defined(_WIN64) || defined(_WIN32)
+unsigned int get_true_random(void){
+    unsigned int ret;
+    if(!RtlGenRandom(&ret,4)){
+        ret=rand();
+        printf("\033[1;31mfailed to use RtlGenRandom.\033[0m\n");
+    }
+    return ret;
+}
+#else
 unsigned int get_true_random(void){
     unsigned int seed;
     if(getrandom(&seed,sizeof(seed),GRND_NONBLOCK)!=sizeof(seed)){
+        printf("\033[1;31mfailed to use getrandom.\033[0md\n");
         return (unsigned int)time(NULL)+getpid();
     }
     return seed;
 }
+#endif
 
 unsigned int to_op(const char *str){
     unsigned int op=0;
@@ -448,9 +465,9 @@ int64_t dice_round(int64_t v){
 }
 
 void print_help(void){
-    printf("\033[1mUsage:\033[0m");
+    printf("Usage:");
     printf(" roll [options] [initial_value] [operations...]\n\n");
-    printf("\033[1mOptions:\033[0m\n");
+    printf("Options:\n");
     printf("  -l          Show detailed operation process\n");
     printf("  -c          Show boolean result (success/failure)\n");
     printf("  -g          Higher comparison (for dc)\n");
@@ -458,7 +475,7 @@ void print_help(void){
     printf("  -f          Enable major failure detection\n");
     printf("  -u          Round up results\n");
     printf("  -h          Show this help message\n\n");
-    printf("\033[1mOperations:\033[0m\n");
+    printf("Operations:\n");
     printf("  + [num]     Add number\n");
     printf("  - [num]     Subtract number\n");
     printf("  * [num]     Multiply by number\n");
@@ -467,7 +484,7 @@ void print_help(void){
     printf("  dc [num]    Dice check against target number\n");
     printf("  adv [num]   Advantage: roll X+1, take highest X\n");
     printf("  dis [num]   Disadvantage: roll X+1, take lowest X\n\n");
-    printf("\033[1mExamples:\033[0m\n");
+    printf("Examples:\n");
     printf("  roll 5 d 6          # Roll 5d6\n");
     printf("  roll -l 2 adv 20    # Advantage roll with details\n");
     printf("  roll 15 dc 10       # Check if result beats target 10\n");

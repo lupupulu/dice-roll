@@ -1,3 +1,4 @@
+CC ?= gcc
 CFLAGS ?= -O2 -s
 TARGET = roll
 

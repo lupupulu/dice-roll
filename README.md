@@ -7,6 +7,10 @@ A command-line dice roller for tabletop RPGs.
 ```bash
 gcc -o roll main.c
 ```
+or
+```bash
+make install
+```
 
 ## Usage
 ```
@@ -50,5 +54,4 @@ roll -l -s -f 5 d 20 dc 15  # Complex check with options
 
 ## Notes
 - Operators and numbers must be space-separated
-- First argument cannot be an operator (except options)
 - Uses system's true random number generator when available
